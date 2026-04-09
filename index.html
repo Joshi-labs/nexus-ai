@@ -75,6 +75,35 @@
         </button>
     </main>
 
+    <div id="privacyModal" class="fixed inset-0 z-[100] hidden flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm transition-opacity opacity-0 duration-300">
+        <div class="bg-gray-900 border border-gray-700 rounded-3xl max-w-sm w-full p-6 shadow-2xl transform scale-95 transition-transform duration-300" id="privacyModalContent">
+            <div class="flex items-center gap-4 mb-5">
+                <div class="w-12 h-12 rounded-full bg-green-500/10 border border-green-500/20 flex items-center justify-center text-green-400 shrink-0">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold text-white">100% Local & Secure</h3>
+                    <p class="text-xs text-green-400 font-mono">Zero-Knowledge Architecture</p>
+                </div>
+            </div>
+            
+            <p class="text-sm text-gray-400 mb-5 leading-relaxed">
+                Your media <strong class="text-white">never</strong> leaves this device. All AI inferencing is performed locally on your own hardware using WebGL and TensorFlow.js.
+            </p>
+            
+            <div class="bg-gray-950 rounded-xl p-4 border border-gray-800 mb-6 relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-1 h-full bg-cyan-500"></div>
+                <p class="text-xs text-gray-400 italic">
+                    "Don't trust us? Turn off your Wi-Fi and Cellular Data right now. The app will still work perfectly."
+                </p>
+            </div>
+            
+            <button onclick="closeModal()" class="w-full bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-3.5 rounded-xl transition-colors shadow-lg shadow-cyan-500/20">
+                Acknowledge
+            </button>
+        </div>
+    </div>
+
     <video id="sourceVideo" class="hidden" playsinline muted></video>
     <img id="sourceImage" class="hidden" />
 
