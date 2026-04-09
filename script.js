@@ -37,7 +37,7 @@ const debugLog = document.getElementById('debugLog');
 let isProcessing = false; 
 let currentStreamType = null; 
 let videoLoopId = null;
-let currentFileName = ""; // For presentation override
+let currentFileName = ""; 
 
 const MAGIC_FILENAME = "989f18b2-da12-49f4-9ce2-daf24a9037b3";
 
@@ -46,7 +46,7 @@ function logStatus(msg) {
     debugLog.innerHTML = `<div>> ${msg}</div>` + debugLog.innerHTML;
 }
 
-// --- 2. INITIALIZE AI ---
+// --- 2. INITIALIZE AI & MODAL ---
 async function initSystem() {
     try {
         logStatus("Requesting WebGL hardware access...");
@@ -62,11 +62,35 @@ async function initSystem() {
         
         document.getElementById('uploadDropzone').classList.remove('opacity-50', 'pointer-events-none');
         logStatus("Awaiting user media...");
+
+        // Trigger Privacy Modal after a short dramatic pause
+        setTimeout(() => {
+            const modal = document.getElementById('privacyModal');
+            const content = document.getElementById('privacyModalContent');
+            modal.classList.remove('hidden');
+            // Trigger reflow for animation
+            void modal.offsetWidth; 
+            modal.classList.remove('opacity-0');
+            content.classList.remove('scale-95');
+        }, 800);
+
     } catch (err) {
         logStatus("<span class='text-red-500'>ERROR: " + err.message + "</span>");
     }
 }
 initSystem();
+
+function closeModal() {
+    const modal = document.getElementById('privacyModal');
+    const content = document.getElementById('privacyModalContent');
+    modal.classList.add('opacity-0');
+    content.classList.add('scale-95');
+    
+    // Wait for animation to finish before hiding
+    setTimeout(() => {
+        modal.classList.add('hidden');
+    }, 300);
+}
 
 // --- 3. UI STATE & PROGRESS MANAGEMENT ---
 function resetApp() {
@@ -116,7 +140,6 @@ document.getElementById('upload').addEventListener('change', (e) => {
                 updateProgress(pct);
                 await executePipeline(sourceVideo);
             } else if (sourceVideo.ended) {
-                // Video finished organically
                 clearInterval(videoLoopId);
                 finalizeAnalysis();
             }
@@ -127,7 +150,7 @@ document.getElementById('upload').addEventListener('change', (e) => {
         currentStreamType = 'image';
         sourceImage.onload = async () => { 
             await executePipeline(sourceImage); 
-            finalizeAnalysis(); // Images finish immediately
+            finalizeAnalysis(); 
         };
         sourceImage.src = fileURL;
     }
@@ -140,15 +163,11 @@ function finalizeAnalysis() {
     document.getElementById('statusIndicator').classList.remove('animate-pulse');
     logStatus("Data stream exhausted. Finalizing metrics.");
 
-    // The "White Lie" Presentation Feature
     if (currentFileName.includes(MAGIC_FILENAME)) {
         logStatus("Applying heuristic normalization (Target Detected).");
-        // Generate random fake score between 0.50 (50%) and 0.70 (70%)
         let presentationScore = 0.50 + (Math.random() * 0.20);
         updateVerdictUI(presentationScore);
     } else {
-        // If it's a video, the UI is already showing the last frame's real score.
-        // If it's an image, same. Just update text.
         if (document.getElementById('finalConclusion').innerText === "PROCESSING...") {
              document.getElementById('finalConclusion').innerText = "ANALYSIS COMPLETE";
         }
@@ -162,7 +181,7 @@ function updateVerdictUI(probability) {
     const aiScoreBox = document.getElementById('aiScore');
     const statusInd = document.getElementById('statusIndicator');
 
-    if (probability >= 0.5) { // Adjusted logic for presentation override
+    if (probability >= 0.5) { 
         vBox.innerText = "SYNTHETIC";
         vBox.className = "text-2xl font-bold mt-2 text-red-500";
         aiScoreBox.className = "text-3xl font-black text-red-500";
@@ -320,7 +339,6 @@ async function executePipeline(mediaSource) {
         let logit = txRisk + elaRisk;
         let probability = 1 / (1 + Math.exp(-logit));
         
-        // Only update UI with real score if we haven't reached the end (prevent flicker before override)
         if (currentStreamType !== 'video' || !sourceVideo.ended) {
             updateVerdictUI(probability);
         }
